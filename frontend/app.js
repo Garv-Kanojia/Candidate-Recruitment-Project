@@ -1,6 +1,6 @@
 // ── Configuration ────────────────────────────────────────────────────────────
 // Replace with your Hugging Face Spaces backend URL
-const API_BASE = "https://YOUR-HF-SPACE.hf.space";
+const API_BASE = "https://megatron14-candidate-recruitment-backend.hf.space";
 
 // ── Auth Guard ──────────────────────────────────────────────────────────────
 if (!sessionStorage.getItem("auth_token")) {
