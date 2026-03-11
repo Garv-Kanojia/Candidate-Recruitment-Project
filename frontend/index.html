@@ -11,11 +11,50 @@
 <body>
     <div class="container">
         <header>
-            <h1>Candidate Recruitment</h1>
-            <p class="subtitle">Evaluate candidates and schedule interviews</p>
+            <div class="header-bar">
+                <div>
+                    <h1>Candidate Recruitment</h1>
+                    <p class="subtitle">Evaluate candidates and schedule interviews</p>
+                </div>
+                <div class="user-info">
+                    <span class="user-email" id="user-email"></span>
+                    <button class="btn-logout" id="logout-btn">Sign Out</button>
+                </div>
+            </div>
         </header>
 
         <main>
+            <!-- Dashboard -->
+            <section class="dashboard">
+                <h2 class="dashboard-title">Recruiter Dashboard</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value">128</span>
+                        <span class="metric-label">Total Applicants</span>
+                    </div>
+                    <div class="metric-card metric--success">
+                        <span class="metric-value">42</span>
+                        <span class="metric-label">Shortlisted</span>
+                    </div>
+                    <div class="metric-card metric--warning">
+                        <span class="metric-value">18</span>
+                        <span class="metric-label">Interviews Scheduled</span>
+                    </div>
+                    <div class="metric-card metric--error">
+                        <span class="metric-value">86</span>
+                        <span class="metric-label">Rejected</span>
+                    </div>
+                    <div class="metric-card metric--info">
+                        <span class="metric-value">67%</span>
+                        <span class="metric-label">Rejection Rate</span>
+                    </div>
+                    <div class="metric-card metric--primary">
+                        <span class="metric-value">5</span>
+                        <span class="metric-label">Offers Extended</span>
+                    </div>
+                </div>
+            </section>
+
             <!-- Step 1: Evaluate Candidates -->
             <section class="card" id="evaluate-section">
                 <div class="card-header">
@@ -43,11 +82,6 @@
                 </div>
 
                 <div class="card-actions">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="send-emails" />
-                        <span class="toggle-switch"></span>
-                        Send test-link emails to selected candidates
-                    </label>
                     <button class="btn btn-primary" id="evaluate-btn" disabled>
                         <span class="btn-text">Evaluate</span>
                         <span class="btn-loader" hidden></span>

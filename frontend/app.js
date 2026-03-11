@@ -2,13 +2,33 @@
 // Replace with your Hugging Face Spaces backend URL
 const API_BASE = "https://YOUR-HF-SPACE.hf.space";
 
+// ── Auth Guard ──────────────────────────────────────────────────────────────
+if (!sessionStorage.getItem("auth_token")) {
+    window.location.replace("login.html");
+}
+
+// Show user email & wire logout
+const userEmailEl = document.getElementById("user-email");
+const logoutBtn = document.getElementById("logout-btn");
+
+if (userEmailEl) {
+    userEmailEl.textContent = sessionStorage.getItem("auth_email") || "";
+}
+
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+        sessionStorage.removeItem("auth_token");
+        sessionStorage.removeItem("auth_email");
+        window.location.replace("login.html");
+    });
+}
+
 // ── DOM refs ────────────────────────────────────────────────────────────────
 const evaluateFile = document.getElementById("evaluate-file");
 const evaluateDrop = document.getElementById("evaluate-drop");
 const evaluateFileName = document.getElementById("evaluate-file-name");
 const evaluateBtn = document.getElementById("evaluate-btn");
 const evaluateResults = document.getElementById("evaluate-results");
-const sendEmailsCheckbox = document.getElementById("send-emails");
 
 const scheduleFile = document.getElementById("schedule-file");
 const scheduleDrop = document.getElementById("schedule-drop");
@@ -93,7 +113,13 @@ async function uploadFile(endpoint, file, params = {}) {
     const form = new FormData();
     form.append("file", file);
 
-    const res = await fetch(url.toString(), { method: "POST", body: form });
+    const headers = {};
+    const token = sessionStorage.getItem("auth_token");
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const res = await fetch(url.toString(), { method: "POST", body: form, headers });
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: res.statusText }));
@@ -197,7 +223,7 @@ evaluateBtn.addEventListener("click", async () => {
     evaluateResults.hidden = true;
     try {
         const data = await uploadFile("/evaluate", evaluateCsvFile, {
-            send_emails: sendEmailsCheckbox.checked,
+            send_emails: true,
         });
         renderEvaluateResults(data);
     } catch (err) {
