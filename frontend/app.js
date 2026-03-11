@@ -37,6 +37,30 @@ const scheduleFileName = document.getElementById("schedule-file-name");
 const scheduleBtn = document.getElementById("schedule-btn");
 const scheduleResults = document.getElementById("schedule-results");
 
+// Dashboard stat elements
+const evalTotalEl = document.getElementById("eval-total");
+const evalAcceptedEl = document.getElementById("eval-accepted");
+const evalRejectedEl = document.getElementById("eval-rejected");
+const evalPctEl = document.getElementById("eval-pct");
+const schedTotalEl = document.getElementById("sched-total");
+const schedScheduledEl = document.getElementById("sched-scheduled");
+const schedRejectedEl = document.getElementById("sched-rejected");
+const schedPctEl = document.getElementById("sched-pct");
+const vacancyDisplay = document.getElementById("vacancy-display");
+
+// Vacancy editor elements
+const vacancyEditBtn = document.getElementById("vacancy-edit-btn");
+const vacancyEditor = document.getElementById("vacancy-editor");
+const vacancyInput = document.getElementById("vacancy-input");
+const vacancySaveBtn = document.getElementById("vacancy-save-btn");
+const vacancyCancelBtn = document.getElementById("vacancy-cancel-btn");
+
+// Scheduling option elements
+const interviewDateInput = document.getElementById("interview-date");
+const interviewStartTime = document.getElementById("interview-start-time");
+const interviewDuration = document.getElementById("interview-duration");
+const interviewGap = document.getElementById("interview-gap");
+
 // ── State ───────────────────────────────────────────────────────────────────
 let evaluateCsvFile = null;
 let scheduleCsvFile = null;
@@ -47,6 +71,13 @@ function updateEvaluateBtnState() {
 
 jdInput.addEventListener("input", updateEvaluateBtnState);
 testLinkInput.addEventListener("input", updateEvaluateBtnState);
+
+// Set default interview date to tomorrow
+(function setDefaultDate() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    interviewDateInput.value = tomorrow.toISOString().split("T")[0];
+})();
 
 // ── Drag-and-Drop + Click helpers ───────────────────────────────────────────
 function setupUploadArea(dropArea, fileInput, onFileSelected) {
@@ -217,6 +248,10 @@ function renderScheduleResults(data) {
         tableHtml += `<p style="margin-top:.75rem;color:var(--clr-text-muted);font-size:.85rem">${escapeHtml(data.message)}</p>`;
     }
 
+    if (data.warning) {
+        tableHtml += `<div class="warning-banner" style="margin-top:.75rem">${escapeHtml(data.warning)}</div>`;
+    }
+
     scheduleResults.innerHTML = summaryHtml + tableHtml;
 }
 
@@ -224,6 +259,75 @@ function showError(container, msg) {
     container.hidden = false;
     container.innerHTML = `<div class="error-banner">${escapeHtml(msg)}</div>`;
 }
+
+// ── Dashboard Stats ─────────────────────────────────────────────────────────
+async function fetchStats() {
+    try {
+        const token = sessionStorage.getItem("auth_token");
+        const res = await fetch(`${API_BASE}/stats`, {
+            headers: { "Authorization": `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Evaluation
+        evalTotalEl.textContent = data.evaluation.total;
+        evalAcceptedEl.textContent = data.evaluation.accepted;
+        evalRejectedEl.textContent = data.evaluation.rejected;
+        evalPctEl.textContent = data.evaluation.acceptance_pct + "%";
+
+        // Scheduling
+        schedTotalEl.textContent = data.scheduling.total;
+        schedScheduledEl.textContent = data.scheduling.scheduled;
+        schedRejectedEl.textContent = data.scheduling.rejected;
+        schedPctEl.textContent = data.scheduling.acceptance_pct + "%";
+
+        // Vacancy
+        vacancyDisplay.textContent = data.vacancy_count;
+        vacancyInput.value = data.vacancy_count;
+    } catch (e) {
+        console.error("Failed to fetch stats:", e);
+    }
+}
+
+// Fetch stats on page load
+fetchStats();
+
+// ── Vacancy Editor ──────────────────────────────────────────────────────────
+vacancyEditBtn.addEventListener("click", () => {
+    vacancyEditor.hidden = false;
+    vacancyEditBtn.hidden = true;
+    vacancyInput.focus();
+});
+
+vacancyCancelBtn.addEventListener("click", () => {
+    vacancyEditor.hidden = true;
+    vacancyEditBtn.hidden = false;
+});
+
+vacancySaveBtn.addEventListener("click", async () => {
+    const value = parseInt(vacancyInput.value, 10);
+    if (isNaN(value) || value < 1) return;
+    try {
+        const token = sessionStorage.getItem("auth_token");
+        const res = await fetch(`${API_BASE}/settings`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ vacancy_count: value }),
+        });
+        if (res.ok) {
+            const data = await res.json();
+            vacancyDisplay.textContent = data.vacancy_count;
+        }
+    } catch (e) {
+        console.error("Failed to update vacancy:", e);
+    }
+    vacancyEditor.hidden = true;
+    vacancyEditBtn.hidden = false;
+});
 
 // ── Button handlers ─────────────────────────────────────────────────────────
 evaluateBtn.addEventListener("click", async () => {
@@ -238,6 +342,7 @@ evaluateBtn.addEventListener("click", async () => {
             { jd: jdInput.value.trim(), test_link: testLinkInput.value.trim() }
         );
         renderEvaluateResults(data);
+        fetchStats();
     } catch (err) {
         showError(evaluateResults, err.message);
     } finally {
@@ -250,8 +355,19 @@ scheduleBtn.addEventListener("click", async () => {
     setLoading(scheduleBtn, true);
     scheduleResults.hidden = true;
     try {
-        const data = await uploadFile("/schedule", scheduleCsvFile);
+        const data = await uploadFile(
+            "/schedule",
+            scheduleCsvFile,
+            {},
+            {
+                start_date: interviewDateInput.value,
+                start_time: interviewStartTime.value,
+                duration: interviewDuration.value,
+                gap: interviewGap.value,
+            }
+        );
         renderScheduleResults(data);
+        fetchStats();
     } catch (err) {
         showError(scheduleResults, err.message);
     } finally {

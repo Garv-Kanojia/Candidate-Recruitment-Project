@@ -27,30 +27,61 @@
             <!-- Dashboard -->
             <section class="dashboard">
                 <h2 class="dashboard-title">Recruiter Dashboard</h2>
+
+                <!-- Evaluation Stats -->
+                <h3 class="sub-dashboard-title">Evaluation</h3>
                 <div class="metrics-grid">
                     <div class="metric-card">
-                        <span class="metric-value">128</span>
-                        <span class="metric-label">Total Applicants</span>
+                        <span class="metric-value" id="eval-total">0</span>
+                        <span class="metric-label">Total Evaluated</span>
                     </div>
                     <div class="metric-card metric--success">
-                        <span class="metric-value">42</span>
-                        <span class="metric-label">Shortlisted</span>
-                    </div>
-                    <div class="metric-card metric--warning">
-                        <span class="metric-value">18</span>
-                        <span class="metric-label">Interviews Scheduled</span>
+                        <span class="metric-value" id="eval-accepted">0</span>
+                        <span class="metric-label">Accepted</span>
                     </div>
                     <div class="metric-card metric--error">
-                        <span class="metric-value">86</span>
+                        <span class="metric-value" id="eval-rejected">0</span>
                         <span class="metric-label">Rejected</span>
                     </div>
                     <div class="metric-card metric--info">
-                        <span class="metric-value">67%</span>
-                        <span class="metric-label">Rejection Rate</span>
+                        <span class="metric-value" id="eval-pct">0%</span>
+                        <span class="metric-label">Acceptance Rate</span>
                     </div>
-                    <div class="metric-card metric--primary">
-                        <span class="metric-value">5</span>
-                        <span class="metric-label">Offers Extended</span>
+                </div>
+
+                <!-- Scheduling Stats -->
+                <h3 class="sub-dashboard-title" style="margin-top:1.5rem">Scheduling</h3>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-value" id="sched-total">0</span>
+                        <span class="metric-label">Total Processed</span>
+                    </div>
+                    <div class="metric-card metric--success">
+                        <span class="metric-value" id="sched-scheduled">0</span>
+                        <span class="metric-label">Scheduled</span>
+                    </div>
+                    <div class="metric-card metric--error">
+                        <span class="metric-value" id="sched-rejected">0</span>
+                        <span class="metric-label">Rejected</span>
+                    </div>
+                    <div class="metric-card metric--info">
+                        <span class="metric-value" id="sched-pct">0%</span>
+                        <span class="metric-label">Acceptance Rate</span>
+                    </div>
+                    <div class="metric-card metric--primary vacancy-card">
+                        <span class="metric-value" id="vacancy-display">10</span>
+                        <span class="metric-label">Vacancies</span>
+                        <button class="vacancy-edit-btn" id="vacancy-edit-btn" title="Edit vacancies">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+                        <div class="vacancy-editor" id="vacancy-editor" hidden>
+                            <input type="number" id="vacancy-input" min="1" max="999" value="10" />
+                            <button class="vacancy-save-btn" id="vacancy-save-btn">Save</button>
+                            <button class="vacancy-cancel-btn" id="vacancy-cancel-btn">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -125,6 +156,35 @@
                     <p class="upload-text">Drag & drop your <strong>test results CSV</strong> here</p>
                     <p class="upload-hint">or click to browse &middot; .csv only</p>
                     <p class="file-name" id="schedule-file-name"></p>
+                </div>
+
+                <div class="schedule-options">
+                    <div class="form-group">
+                        <label for="interview-date">Interview Date</label>
+                        <input type="date" id="interview-date" />
+                    </div>
+                    <div class="form-group">
+                        <label for="interview-start-time">Start Time</label>
+                        <input type="time" id="interview-start-time" value="11:30" />
+                    </div>
+                    <div class="form-group">
+                        <label for="interview-duration">Duration (min)</label>
+                        <select id="interview-duration">
+                            <option value="15">15</option>
+                            <option value="30" selected>30</option>
+                            <option value="45">45</option>
+                            <option value="60">60</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="interview-gap">Gap (min)</label>
+                        <select id="interview-gap">
+                            <option value="5" selected>5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="20">20</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="card-actions">
