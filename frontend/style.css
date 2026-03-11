@@ -485,7 +485,8 @@ footer {
   margin-bottom: 0.35rem;
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea {
   width: 100%;
   padding: 0.6rem 0.75rem;
   font-size: 0.9rem;
@@ -497,7 +498,14 @@ footer {
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.form-group input:focus {
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
   border-color: var(--clr-primary);
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
 }

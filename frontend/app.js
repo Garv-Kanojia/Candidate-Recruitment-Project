@@ -29,6 +29,8 @@ const evaluateDrop = document.getElementById("evaluate-drop");
 const evaluateFileName = document.getElementById("evaluate-file-name");
 const evaluateBtn = document.getElementById("evaluate-btn");
 const evaluateResults = document.getElementById("evaluate-results");
+const jdInput = document.getElementById("jd-input");
+const testLinkInput = document.getElementById("test-link-input");
 
 const scheduleFile = document.getElementById("schedule-file");
 const scheduleDrop = document.getElementById("schedule-drop");
@@ -39,6 +41,13 @@ const scheduleResults = document.getElementById("schedule-results");
 // ── State ───────────────────────────────────────────────────────────────────
 let evaluateCsvFile = null;
 let scheduleCsvFile = null;
+
+function updateEvaluateBtnState() {
+    evaluateBtn.disabled = !(evaluateCsvFile && jdInput.value.trim() && testLinkInput.value.trim());
+}
+
+jdInput.addEventListener("input", updateEvaluateBtnState);
+testLinkInput.addEventListener("input", updateEvaluateBtnState);
 
 // ── Drag-and-Drop + Click helpers ───────────────────────────────────────────
 function setupUploadArea(dropArea, fileInput, onFileSelected) {
@@ -79,7 +88,7 @@ setupUploadArea(evaluateDrop, evaluateFile, (file) => {
     evaluateCsvFile = file;
     evaluateFileName.textContent = file.name;
     evaluateDrop.classList.add("has-file");
-    evaluateBtn.disabled = false;
+    updateEvaluateBtnState();
 });
 
 // ── Wire up Schedule upload ─────────────────────────────────────────────────
@@ -106,12 +115,13 @@ function setLoading(btn, loading) {
     }
 }
 
-async function uploadFile(endpoint, file, params = {}) {
+async function uploadFile(endpoint, file, params = {}, formFields = {}) {
     const url = new URL(endpoint, API_BASE);
     Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
     const form = new FormData();
     form.append("file", file);
+    Object.entries(formFields).forEach(([k, v]) => form.append(k, v));
 
     const headers = {};
     const token = sessionStorage.getItem("auth_token");
@@ -222,9 +232,12 @@ evaluateBtn.addEventListener("click", async () => {
     setLoading(evaluateBtn, true);
     evaluateResults.hidden = true;
     try {
-        const data = await uploadFile("/evaluate", evaluateCsvFile, {
-            send_emails: true,
-        });
+        const data = await uploadFile(
+            "/evaluate",
+            evaluateCsvFile,
+            { send_emails: true },
+            { jd: jdInput.value.trim(), test_link: testLinkInput.value.trim() }
+        );
         renderEvaluateResults(data);
     } catch (err) {
         showError(evaluateResults, err.message);
