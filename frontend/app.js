@@ -1,6 +1,10 @@
 // ── Configuration ────────────────────────────────────────────────────────────
-// Replace with your Hugging Face Spaces backend URL
-const API_BASE = "https://megatron14-candidate-recruitment-backend.hf.space";
+// Auto-detect: use localhost when developing locally, HF Space in production.
+const _h = window.location.hostname;
+const API_BASE =
+    _h === "localhost" || _h === "127.0.0.1" || _h === ""
+        ? "http://localhost:8000"
+        : "https://megatron14-candidate-recruitment-backend.hf.space";
 
 // ── Auth Guard ──────────────────────────────────────────────────────────────
 if (!sessionStorage.getItem("auth_token")) {
