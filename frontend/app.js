@@ -186,14 +186,13 @@ function renderEvalLastResults(containerEl, items) {
     containerEl.innerHTML = `
       <table class="prev-results-table">
         <thead><tr>
-          <th>Name</th><th>Email</th><th>Score</th><th>Reason</th><th>Resume</th>
+          <th>Name</th><th>Email</th><th>Resume</th><th>Accepted</th>
         </tr></thead>
         <tbody>
           ${items.map((item) => {
         const name = escapeHtml(item.name || "");
         const email = escapeHtml(item.email || "");
         const verdict = item.verdict || "";
-        const reason = escapeHtml(item.reason || "");
         const resumeLink = item.resume_link || "";
         const badgeClass = verdict === "YES" ? "yes" : verdict === "NO" ? "no" : "err";
         const resumeHtml = resumeLink
@@ -202,9 +201,8 @@ function renderEvalLastResults(containerEl, items) {
         return `<tr>
                 <td>${name}</td>
                 <td>${email}</td>
-                <td><span class="badge badge--${badgeClass}">${escapeHtml(verdict)}</span></td>
-                <td class="reason-cell">${reason}</td>
                 <td>${resumeHtml}</td>
+                <td><span class="badge badge--${badgeClass}">${escapeHtml(verdict)}</span></td>
               </tr>`;
     }).join("")}
         </tbody>
@@ -219,24 +217,23 @@ function renderSchedLastResults(containerEl, items) {
     containerEl.innerHTML = `
       <table class="prev-results-table">
         <thead><tr>
-          <th>Name</th><th>Email</th><th>Reasoning Score</th><th>Coding Score</th><th>Link</th>
+          <th>Name</th><th>Email</th><th>Resume</th><th>Accepted</th>
         </tr></thead>
         <tbody>
           ${items.map((item) => {
         const name = escapeHtml(item.name || "");
         const email = escapeHtml(item.email || "");
-        const testLa = item.test_la != null ? item.test_la : "—";
-        const testCode = item.test_code != null ? item.test_code : "—";
-        const meetLink = item.meet_link || "";
-        const linkHtml = meetLink && meetLink !== "N/A"
-            ? `<a href="${escapeHtml(meetLink)}" target="_blank" rel="noopener">Join</a>`
+        const status = item.status || "";
+        const resumeLink = item.resume_link || "";
+        const badgeClass = status === "SCHEDULED" ? "yes" : status === "REJECTED" ? "no" : "err";
+        const resumeHtml = resumeLink
+            ? `<a href="${escapeHtml(resumeLink)}" target="_blank" rel="noopener">View</a>`
             : "—";
         return `<tr>
                 <td>${name}</td>
                 <td>${email}</td>
-                <td>${testLa}</td>
-                <td>${testCode}</td>
-                <td>${linkHtml}</td>
+                <td>${resumeHtml}</td>
+                <td><span class="badge badge--${badgeClass}">${escapeHtml(status)}</span></td>
               </tr>`;
     }).join("")}
         </tbody>
