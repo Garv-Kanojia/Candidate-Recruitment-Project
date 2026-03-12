@@ -66,9 +66,10 @@ form.addEventListener("submit", async (e) => {
             throw new Error(data.detail || `Request failed (${res.status})`);
         }
 
-        // Store token and redirect
+        // Store token, user id and redirect
         sessionStorage.setItem("auth_token", data.token || "authenticated");
-        sessionStorage.setItem("auth_email", email);
+        sessionStorage.setItem("auth_email", data.email || email);
+        if (data.user_id) sessionStorage.setItem("auth_user_id", data.user_id);
         window.location.replace("index.html");
     } catch (err) {
         authError.textContent = err.message;
