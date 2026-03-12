@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Candidate Recruitment</title>
     <link rel="stylesheet" href="style.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 
 <body>
@@ -90,34 +89,13 @@
                 </div>
 
                 <div class="card-actions">
-                    <label class="toggle-label">
-                        <input type="checkbox" id="send-emails-toggle" />
-                        <span class="toggle-switch"></span>
-                        Send test-link emails to accepted candidates
-                    </label>
+                    <button class="btn btn-secondary" id="eval-refresh-btn">
+                        <span class="btn-text">Refresh Results</span>
+                    </button>
                     <button class="btn btn-primary" id="evaluate-btn" disabled>
                         <span class="btn-text">Evaluate</span>
                         <span class="btn-loader" hidden></span>
                     </button>
-                </div>
-
-                <!-- Live evaluation results (shown during async processing) -->
-                <div class="live-results-panel" id="live-results-panel" hidden>
-                    <div class="live-results-header">
-                        <h4 class="live-results-title">
-                            <span class="pulse-dot"></span>
-                            Processing Candidates
-                        </h4>
-                        <span class="live-results-progress" id="live-results-progress">0 / 0</span>
-                    </div>
-                    <div class="live-results-table-wrap" id="live-results-body">
-                        <table class="prev-results-table" id="live-results-table">
-                            <thead><tr>
-                                <th>Name</th><th>Email</th><th>Verdict</th><th>Reason</th><th>Resume</th>
-                            </tr></thead>
-                            <tbody id="live-results-tbody"></tbody>
-                        </table>
-                    </div>
                 </div>
             </section>
 
@@ -205,13 +183,15 @@
                 </div>
 
                 <div class="card-actions">
+                    <button class="btn btn-secondary" id="sched-refresh-btn">
+                        <span class="btn-text">Refresh Results</span>
+                    </button>
                     <button class="btn btn-primary" id="schedule-btn" disabled>
                         <span class="btn-text">Schedule Interviews</span>
                         <span class="btn-loader" hidden></span>
                     </button>
                 </div>
             </section>
-        </main>
 
             <!-- Settings -->
             <section class="card" id="settings-section">

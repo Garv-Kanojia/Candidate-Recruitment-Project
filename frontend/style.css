@@ -436,6 +436,16 @@ footer {
   background: var(--clr-primary-hover);
 }
 
+.btn-secondary {
+  background: var(--clr-surface);
+  color: var(--clr-primary);
+  border: 1px solid var(--clr-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--clr-primary-light);
+}
+
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;

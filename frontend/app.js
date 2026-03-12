@@ -1,20 +1,12 @@
 // ── Configuration ────────────────────────────────────────────────────────────
 const API_BASE = "https://megatron14-candidate-recruitment-backend.hf.space";
 
-// Supabase config — replace with your project values
-const SUPABASE_URL = "https://YOUR_PROJECT.supabase.co";
-const SUPABASE_ANON_KEY = "YOUR_ANON_KEY";
-
 // ── Auth Guard ──────────────────────────────────────────────────────────────
 if (!sessionStorage.getItem("auth_token")) {
     window.location.replace("login.html");
 }
 
 const AUTH_TOKEN = sessionStorage.getItem("auth_token");
-const AUTH_USER_ID = sessionStorage.getItem("auth_user_id");
-
-// ── Supabase Client ─────────────────────────────────────────────────────────
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Show user email & wire logout
 const userEmailEl = document.getElementById("user-email");
@@ -40,12 +32,10 @@ const evaluateFileName = document.getElementById("evaluate-file-name");
 const evaluateBtn = document.getElementById("evaluate-btn");
 const jdInput = document.getElementById("jd-input");
 const testLinkInput = document.getElementById("test-link-input");
-const sendEmailsToggle = document.getElementById("send-emails-toggle");
 
-// Live results panel
-const liveResultsPanel = document.getElementById("live-results-panel");
-const liveResultsProgress = document.getElementById("live-results-progress");
-const liveResultsTbody = document.getElementById("live-results-tbody");
+// Refresh buttons
+const evalRefreshBtn = document.getElementById("eval-refresh-btn");
+const schedRefreshBtn = document.getElementById("sched-refresh-btn");
 
 const scheduleFile = document.getElementById("schedule-file");
 const scheduleDrop = document.getElementById("schedule-drop");
@@ -292,119 +282,41 @@ async function fetchStats() {
     }
 }
 
-// ── Supabase Realtime — live evaluation results ─────────────────────────────
-let realtimeChannel = null;
-let expectedCandidates = 0;
-let receivedCandidates = 0;
-
-function showLivePanel(total) {
-    expectedCandidates = total;
-    receivedCandidates = 0;
-    liveResultsTbody.innerHTML = "";
-    liveResultsProgress.textContent = `0 / ${total}`;
-    liveResultsPanel.hidden = false;
-}
-
-function hideLivePanel() {
-    liveResultsPanel.hidden = true;
-}
-
-function appendLiveRow(row) {
-    receivedCandidates++;
-    liveResultsProgress.textContent = `${receivedCandidates} / ${expectedCandidates}`;
-
-    const name = escapeHtml(row.candidate_name || "");
-    const email = escapeHtml(row.candidate_email || "");
-    const verdict = row.verdict || "";
-    const reason = escapeHtml(row.reason || "");
-    const resumeLink = row.resume_link || "";
-    const badgeClass = verdict === "YES" ? "yes" : verdict === "NO" ? "no" : "err";
-    const resumeHtml = resumeLink
-        ? `<a href="${escapeHtml(resumeLink)}" target="_blank" rel="noopener">View</a>`
-        : "—";
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-        <td>${name}</td>
-        <td>${email}</td>
-        <td><span class="badge badge--${badgeClass}">${escapeHtml(verdict)}</span></td>
-        <td class="reason-cell">${reason}</td>
-        <td>${resumeHtml}</td>`;
-    liveResultsTbody.prepend(tr);
-
-    if (receivedCandidates >= expectedCandidates) {
-        onEvaluationComplete();
-    }
-}
-
-function onEvaluationComplete() {
-    unsubscribeRealtime();
-    setLoading(evaluateBtn, false);
-    fetchStats();
-}
-
-function subscribeRealtime() {
-    unsubscribeRealtime();
-
-    if (!AUTH_USER_ID) {
-        console.warn("No user_id — cannot subscribe to Supabase Realtime.");
-        return;
-    }
-
-    realtimeChannel = supabase
-        .channel("evaluation-results")
-        .on(
-            "postgres_changes",
-            {
-                event: "INSERT",
-                schema: "public",
-                table: "evaluation_results",
-                filter: `user_id=eq.${AUTH_USER_ID}`,
-            },
-            (payload) => {
-                appendLiveRow(payload.new);
-            },
-        )
-        .subscribe();
-}
-
-function unsubscribeRealtime() {
-    if (realtimeChannel) {
-        supabase.removeChannel(realtimeChannel);
-        realtimeChannel = null;
-    }
-}
-
-// Clean up on page unload
-window.addEventListener("beforeunload", unsubscribeRealtime);
-
 // ── Button handlers ─────────────────────────────────────────────────────────
 evaluateBtn.addEventListener("click", async () => {
     if (!evaluateCsvFile) return;
     setLoading(evaluateBtn, true);
     try {
-        // Subscribe to Realtime BEFORE uploading so we don't miss events
-        subscribeRealtime();
-
         const data = await uploadFile(
             "/evaluate",
             evaluateCsvFile,
             {
                 jd: jdInput.value.trim(),
                 test_link: testLinkInput.value.trim(),
-                send_emails: sendEmailsToggle.checked ? "true" : "false",
             }
         );
 
-        // Backend returns 202 with total_candidates
-        showLivePanel(data.total_candidates || 0);
+        // Backend returns 202 — processing happens in background
+        alert(`Evaluation started for ${data.total_candidates} candidates. Click "Refresh" to see results once processing completes.`);
     } catch (err) {
-        unsubscribeRealtime();
-        hideLivePanel();
-        setLoading(evaluateBtn, false);
         alert(err.message);
+    } finally {
+        setLoading(evaluateBtn, false);
     }
 });
+
+// ── Refresh buttons ─────────────────────────────────────────────────────────
+if (evalRefreshBtn) {
+    evalRefreshBtn.addEventListener("click", () => {
+        fetchStats();
+    });
+}
+
+if (schedRefreshBtn) {
+    schedRefreshBtn.addEventListener("click", () => {
+        fetchStats();
+    });
+}
 
 scheduleBtn.addEventListener("click", async () => {
     if (!scheduleCsvFile) return;
