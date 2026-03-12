@@ -248,10 +248,6 @@ function renderScheduleResults(data) {
         tableHtml += `<p style="margin-top:.75rem;color:var(--clr-text-muted);font-size:.85rem">${escapeHtml(data.message)}</p>`;
     }
 
-    if (data.warning) {
-        tableHtml += `<div class="warning-banner" style="margin-top:.75rem">${escapeHtml(data.warning)}</div>`;
-    }
-
     scheduleResults.innerHTML = summaryHtml + tableHtml;
 }
 
