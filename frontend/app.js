@@ -186,23 +186,27 @@ function renderEvalLastResults(containerEl, items) {
     containerEl.innerHTML = `
       <table class="prev-results-table">
         <thead><tr>
-          <th>Name</th><th>Email</th><th>Resume</th><th>Accepted</th>
+          <th>Name</th><th>Email</th><th>Accepted</th><th>Reason</th><th>Resume</th>
         </tr></thead>
         <tbody>
           ${items.map((item) => {
         const name = escapeHtml(item.name || "");
         const email = escapeHtml(item.email || "");
-        const verdict = item.verdict || "";
+        const reason = escapeHtml(item.reason || "—");
         const resumeLink = item.resume_link || "";
-        const badgeClass = verdict === "YES" ? "yes" : verdict === "NO" ? "no" : "err";
+        // Support both stats format (verdict: "YES"/"NO") and callback format (accepted: bool)
+        const isAccepted = item.accepted !== undefined ? item.accepted : item.verdict === "YES";
+        const badgeClass = isAccepted ? "yes" : (item.verdict === "ERROR" ? "err" : "no");
+        const badgeLabel = isAccepted ? "Yes" : "No";
         const resumeHtml = resumeLink
             ? `<a href="${escapeHtml(resumeLink)}" target="_blank" rel="noopener">View</a>`
             : "—";
         return `<tr>
                 <td>${name}</td>
                 <td>${email}</td>
+                <td><span class="badge badge--${badgeClass}">${badgeLabel}</span></td>
+                <td class="reason-cell">${reason}</td>
                 <td>${resumeHtml}</td>
-                <td><span class="badge badge--${badgeClass}">${escapeHtml(verdict)}</span></td>
               </tr>`;
     }).join("")}
         </tbody>
@@ -217,23 +221,25 @@ function renderSchedLastResults(containerEl, items) {
     containerEl.innerHTML = `
       <table class="prev-results-table">
         <thead><tr>
-          <th>Name</th><th>Email</th><th>Resume</th><th>Accepted</th>
+          <th>Name</th><th>Email</th><th>Accepted</th><th>Meet Link</th>
         </tr></thead>
         <tbody>
           ${items.map((item) => {
         const name = escapeHtml(item.name || "");
         const email = escapeHtml(item.email || "");
-        const status = item.status || "";
-        const resumeLink = item.resume_link || "";
-        const badgeClass = status === "SCHEDULED" ? "yes" : status === "REJECTED" ? "no" : "err";
-        const resumeHtml = resumeLink
-            ? `<a href="${escapeHtml(resumeLink)}" target="_blank" rel="noopener">View</a>`
+        const meetLink = item.meet_link || "";
+        // Support both stats format (status: "SCHEDULED"/"REJECTED") and callback format (accepted: bool)
+        const isAccepted = item.accepted !== undefined ? item.accepted : item.status === "SCHEDULED";
+        const badgeClass = isAccepted ? "yes" : (item.status === "ERROR" ? "err" : "no");
+        const badgeLabel = isAccepted ? "Yes" : "No";
+        const meetHtml = meetLink
+            ? `<a href="${escapeHtml(meetLink)}" target="_blank" rel="noopener">Join</a>`
             : "—";
         return `<tr>
                 <td>${name}</td>
                 <td>${email}</td>
-                <td>${resumeHtml}</td>
-                <td><span class="badge badge--${badgeClass}">${escapeHtml(status)}</span></td>
+                <td><span class="badge badge--${badgeClass}">${badgeLabel}</span></td>
+                <td>${meetHtml}</td>
               </tr>`;
     }).join("")}
         </tbody>
